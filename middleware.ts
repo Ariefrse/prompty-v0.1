@@ -10,12 +10,10 @@ export async function middleware(req: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession()
 
-  // Check if the user is authenticated
-  if (!session && req.nextUrl.pathname !== '/auth') {
+  if (!session && req.nextUrl.pathname !== '/auth' && !req.nextUrl.pathname.startsWith('/auth/')) {
     return NextResponse.redirect(new URL('/auth', req.url))
   }
 
-  // If the user is authenticated and trying to access the auth page, redirect to home
   if (session && req.nextUrl.pathname === '/auth') {
     return NextResponse.redirect(new URL('/', req.url))
   }

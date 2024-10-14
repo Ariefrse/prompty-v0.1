@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { Button } from '@/components/ui/button'
@@ -11,22 +11,49 @@ import { FcGoogle } from 'react-icons/fc'
 export default function Auth() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [name, setName] = useState('')
+  const [isSignUp, setIsSignUp] = useState(false)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
   const supabase = createClientComponentClient()
 
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        router.push('/')
+      }
+    }
+    checkUser()
+  }, [supabase, router])
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+
+    const formData = new FormData()
+    formData.append('email', email)
+    formData.append('password', password)
+
+    const res = await fetch('/api/auth', {
+      method: 'POST',
+      body: formData,
+    })
+
+    const { data, error } = await res.json()
+
     if (error) {
       toast({
         title: "Login Error",
-        description: error.message,
+        description: error,
         variant: "destructive",
       })
     } else {
+      toast({
+        title: "Login Successful",
+        description: "You have been logged in.",
+      })
       router.push('/')
       router.refresh()
     }
@@ -40,26 +67,16 @@ export default function Auth() {
       email, 
       password,
       options: {
+        data: { full_name: name },
         emailRedirectTo: `${window.location.origin}/auth/callback`
       }
     })
     if (error) {
-      let errorMessage = error.message
-      if (error.status === 422 && error.message.includes('anonymous_provider_disabled')) {
-        errorMessage = "Email/password sign-ups are currently disabled. Please use Google sign-in or contact the administrator."
-      }
       toast({
         title: "Sign Up Error",
-        description: errorMessage,
+        description: error.message,
         variant: "destructive",
       })
-    } else if (data.user && data.session) {
-      toast({
-        title: "Sign Up Successful",
-        description: "You have been automatically logged in.",
-      })
-      router.push('/')
-      router.refresh()
     } else {
       toast({
         title: "Sign Up Successful",
@@ -101,11 +118,25 @@ export default function Auth() {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
-      <Button onClick={handleLogin} disabled={loading}>
-        {loading ? 'Loading...' : 'Login'}
-      </Button>
-      <Button onClick={handleSignUp} disabled={loading} variant="outline">
-        {loading ? 'Loading...' : 'Sign Up'}
+      {isSignUp && (
+        <Input
+          type="text"
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+      )}
+      {isSignUp ? (
+        <Button onClick={handleSignUp} disabled={loading}>
+          {loading ? 'Loading...' : 'Sign Up'}
+        </Button>
+      ) : (
+        <Button onClick={handleLogin} disabled={loading}>
+          {loading ? 'Loading...' : 'Login'}
+        </Button>
+      )}
+      <Button onClick={() => setIsSignUp(!isSignUp)} variant="outline">
+        {isSignUp ? 'Already have an account? Login' : 'Need an account? Sign Up'}
       </Button>
       <div className="relative">
         <div className="absolute inset-0 flex items-center">

@@ -1,18 +1,22 @@
-"use client"
-
-import { useEffect } from 'react'
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
 import Auth from '@/components/Auth'
-import { testSupabaseConnection } from '@/lib/supabase'
 
-export default function AuthPage() {
-  useEffect(() => {
-    testSupabaseConnection()
-  }, [])
+export default async function AuthPage() {
+  const supabase = createServerComponentClient({ cookies })
+  const { data: { session } } = await supabase.auth.getSession()
+
+  if (session) {
+    redirect('/')
+  }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-md">
-      <h1 className="text-3xl font-bold mb-6 text-center">Login / Sign Up</h1>
-      <Auth />
+    <div className="flex justify-center items-center min-h-screen">
+      <div className="w-full max-w-md">
+        <h1 className="text-3xl font-bold mb-6 text-center">Login / Sign Up</h1>
+        <Auth />
+      </div>
     </div>
   )
 }
