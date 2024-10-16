@@ -1,17 +1,7 @@
-import { redirect } from 'next/navigation';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
-export default async function Home() {
-  const supabase = createServerComponentClient({ cookies });
-  const { data: { session } } = await supabase.auth.getSession();
-
-  if (!session) {
-    redirect('/auth');
-  }
-
+export default function Home() {
   return (
     <div className="container mx-auto px-4 py-12 text-center">
       <h1 className="text-4xl font-bold mb-6">Welcome to Prompty</h1>

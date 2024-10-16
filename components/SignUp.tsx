@@ -2,14 +2,14 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/utils/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useToast } from "@/components/ui/use-toast"
 import { FcGoogle } from 'react-icons/fc'
 import Link from 'next/link'
-import { createClient } from '@/utils/supabase/client'
 
-export default function Auth() {
+export default function SignUp() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -17,41 +17,38 @@ export default function Auth() {
   const { toast } = useToast()
   const supabase = createClient()
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/token`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-        },
-        body: JSON.stringify({
-          email: email,
-          password: password
-        })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error_description || 'Login failed');
+      const { data, error } = await supabase.auth.signUp({ 
+        email, 
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`
+        }
+      })
+      if (error) {
+        throw error
       }
 
-      const data = await response.json();
-      // Handle successful login
-      toast({
-        title: "Login Successful",
-        description: "You have been logged in successfully.",
-      })
-      // You might want to store the access token here
-      // localStorage.setItem('access_token', data.access_token);
-      router.push('/')
-      router.refresh()
+      if (data.session) {
+        toast({
+          title: "Sign Up Successful",
+          description: "You have been automatically logged in.",
+        })
+        router.push('/')
+        router.refresh()
+      } else {
+        toast({
+          title: "Sign Up Successful",
+          description: "Please check your email for the confirmation link.",
+        })
+      }
     } catch (error: any) {
       toast({
-        title: "Login Error",
-        description: error.message || "An unexpected error occurred.",
+        title: "Sign Up Error",
+        description: error.message || "There was an error during sign up.",
         variant: "destructive",
       })
     } finally {
@@ -91,8 +88,8 @@ export default function Auth() {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
-      <Button onClick={handleLogin} disabled={loading}>
-        {loading ? 'Loading...' : 'Login'}
+      <Button onClick={handleSignUp} disabled={loading}>
+        {loading ? 'Loading...' : 'Sign Up'}
       </Button>
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
@@ -106,12 +103,12 @@ export default function Auth() {
       </div>
       <Button onClick={handleGoogleSignIn} disabled={loading} variant="outline" className="flex items-center justify-center">
         <FcGoogle className="mr-2 h-4 w-4" />
-        Sign in with Google
+        Sign up with Google
       </Button>
       <p className="text-center text-sm">
-        Don't have an account?{' '}
-        <Link href="/signup" className="font-semibold text-primary hover:underline">
-          Sign up
+        Already have an account?{' '}
+        <Link href="/auth" className="font-semibold text-primary hover:underline">
+          Log in
         </Link>
       </p>
     </div>
