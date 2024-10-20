@@ -29,7 +29,7 @@ import { supabase } from '@/utils/supabase/client'; // Correct Import
 const promptSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters').max(100, 'Title must be less than 100 characters'),
   description: z.string().min(10, 'Description must be at least 10 characters').max(1000, 'Description must be less than 1000 characters'),
-  aiModel: z.string().min(1, 'Please select an AI model'),
+  model: z.string().min(1, 'Please select an AI model'),
   framework: z.string().min(1, 'Please select a framework'),
   difficulty: z.string().min(1, 'Please select a difficulty level'),
   tags: z.string().refine(value => value.split(',').filter(Boolean).length > 0, {
@@ -37,7 +37,7 @@ const promptSchema = z.object({
   }),
 });
 
-const aiModels = [
+const models = [
   { value: "gpt3", label: "GPT-3" },
   { value: "gpt4", label: "GPT-4" },
   { value: "dalle", label: "DALL-E" },
@@ -70,7 +70,7 @@ export default function SubmitPromptForm() {
     defaultValues: {
       title: '',
       description: '',
-      aiModel: '',
+      model: '',
       framework: '',
       difficulty: '',
       tags: '',
@@ -111,7 +111,7 @@ export default function SubmitPromptForm() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl">
+    <div className="container mx-auto px-4 py-8 max-w-5xl">
       <h1 className="text-3xl font-bold mb-6 text-center">Submit a New Prompt</h1>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -136,7 +136,7 @@ export default function SubmitPromptForm() {
             name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Description</FormLabel>
+                <FormLabel>Prompt</FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder="Describe your prompt in detail..."
@@ -154,7 +154,7 @@ export default function SubmitPromptForm() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormField
               control={form.control}
-              name="aiModel"
+              name="model"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>AI Model</FormLabel>
@@ -165,7 +165,7 @@ export default function SubmitPromptForm() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {aiModels.map((model) => (
+                      {models.map((model) => (
                         <SelectItem key={model.value} value={model.value}>
                           {model.label}
                         </SelectItem>
