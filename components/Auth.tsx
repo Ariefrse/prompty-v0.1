@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { useToast } from "@/components/ui/use-toast"
 import { FcGoogle } from 'react-icons/fc'
 import Link from 'next/link'
-import { createClient } from '@/utils/supabase/client'
+import { createBrowserClient } from '@supabase/ssr'
 
 export default function Auth() {
   const [email, setEmail] = useState('')
@@ -15,37 +15,26 @@ export default function Auth() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
-  const supabase = createClient()
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/token`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-        },
-        body: JSON.stringify({
-          email: email,
-          password: password
-        })
-      });
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error_description || 'Login failed');
-      }
+      if (error) throw error
 
-      const data = await response.json();
-      // Handle successful login
       toast({
         title: "Login Successful",
         description: "You have been logged in successfully.",
       })
-      // You might want to store the access token here
-      // localStorage.setItem('access_token', data.access_token);
       router.push('/')
       router.refresh()
     } catch (error: any) {

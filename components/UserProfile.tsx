@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { User } from '@supabase/supabase-js';
+import { useRouter } from 'next/navigation';
 
 interface Profile {
   id: string;
@@ -11,28 +12,33 @@ interface Profile {
 }
 
 const UserProfile = () => {
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<Profile>();
+  const [user, setUser] = useState<User>();
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
+  const router = useRouter();
 
   useEffect(() => {
     const getProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        router.push('/auth');
+        return;
+      }
+
       setUser(user);
 
-      if (user) {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
 
-        if (error) {
-          console.error('Error fetching profile:', error);
-        } else {
-          setProfile(data);
-        }
+      if (error) {
+        console.error('Error fetching profile:', error);
+      } else {
+        setProfile(data);
       }
 
       setLoading(false);
@@ -46,7 +52,7 @@ const UserProfile = () => {
   }
 
   if (!user) {
-    return <div>Please log in to view your profile.</div>;
+    return;
   }
 
   return (  
