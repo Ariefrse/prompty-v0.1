@@ -21,6 +21,7 @@ import {
 import { toast } from "@/components/ui/use-toast"
 import Link from 'next/link'
 
+
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -86,11 +87,23 @@ export default function PromptGrid() {
     resolver: zodResolver(filterSchema),
     defaultValues: {
       searchTerm: '',
-      model: '',
+      model: '',        
       framework: '',
       difficulty: '',
     },
   })
+
+  const handleAIPromptGenerated = (generatedPrompt: string) => {
+    // Here you can decide how to handle the generated prompt
+    // For example, you could add it to the list of prompts or
+    // pre-fill a form for the user to edit before submitting
+    console.log('Generated prompt:', generatedPrompt)
+    toast({
+      title: "AI Prompt Generated",
+      description: "A new prompt has been generated. You can now edit and submit it.",
+    })
+    // TODO: Implement logic to add the generated prompt to your app's state or UI
+  }
 
   async function onSubmit(values: z.infer<typeof filterSchema>) {
     setLoading(true)
@@ -137,6 +150,8 @@ export default function PromptGrid() {
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       <h1 className="text-3xl font-bold mb-6 text-center">Prompt List</h1>
       
+      
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="mb-6 sm:mb-8 space-y-4">
           <div className="flex items-center space-x-2">

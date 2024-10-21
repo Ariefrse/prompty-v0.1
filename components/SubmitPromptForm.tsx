@@ -26,7 +26,7 @@ import {
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from '@/utils/supabase/client'; // Correct Import
 
-const promptSchema = z.object({
+export const promptSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters').max(100, 'Title must be less than 100 characters'),
   description: z.string().min(10, 'Description must be at least 10 characters').max(1000, 'Description must be less than 1000 characters'),
   model: z.string().min(1, 'Please select an AI model'),
@@ -38,11 +38,12 @@ const promptSchema = z.object({
 });
 
 const models = [
-  { value: "gpt3", label: "GPT-3" },
-  { value: "gpt4", label: "GPT-4" },
-  { value: "dalle", label: "DALL-E" },
-  { value: "stable-diffusion", label: "Stable Diffusion" },
-  { value: "midjourney", label: "Midjourney" },
+  { value: "openai", label: "OpenAI" },
+  { value: "anthropic", label: "Anthropic" },
+  { value: "gemini", label: "Gemini" },
+  { value: "ollama", label: "Ollama" },
+  { value: "mistral", label: "Mistral" },
+  { value: "other", label: "Other" },
 ];
 
 const frameworks = [
