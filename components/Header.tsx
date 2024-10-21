@@ -8,6 +8,15 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { User } from '@supabase/supabase-js';
 import { createClient } from '@/utils/supabase/client';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { ChevronDown, LogOut, Menu, Moon, Sun, User as UserIcon } from 'lucide-react';
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import Sidebar from './Sidebar';
 
 const MoonIcon = dynamic(() => import('lucide-react').then((mod) => mod.Moon), { ssr: false });
 const SunIcon = dynamic(() => import('lucide-react').then((mod) => mod.Sun), { ssr: false });
@@ -33,41 +42,78 @@ const Header = () => {
     setUser(null);
     router.push('/auth');
   };
-  
+
   return (
-    <header className="bg-background border-b fixed top-0 left-0 right-0 z-10">
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <Link href="/" className="flex text-3xl font-bold text-primary">
-          Prompty
-        </Link>
-        <div className="flex items-center space-x-4">
+    <header className="bg-background border-b fixed top-0 left-0 right-0 z-50 h-16">
+      <div className="container mx-auto h-full px-4 flex justify-between items-center">
+        <div className="flex items-center space-x-2">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="sm:hidden"
+              >
+                <Menu className="h-6 w-6" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="p-0">
+              <Sidebar />
+            </SheetContent>
+          </Sheet>
+          <Link href="/" className="text-2xl sm:text-3xl font-bold text-primary">
+            Prompty
+          </Link>
+        </div>
+        <div className="flex items-center">
           {user ? (
-            <>
-              <Link href="/submit">
-                <Button variant="ghost">Submit Prompt</Button>
-              </Link>
-              <Link href="/profile">
-                <Button variant="ghost">Profile</Button>
-              </Link>
-              <Button variant="ghost" onClick={handleLogout}>Logout</Button>
-            </>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <img 
+                    src={user.user_metadata.avatar_url || '/default-avatar.png'} 
+                    alt="User Avatar" 
+                    className="w-8 h-8 rounded-full"
+                  />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem disabled>
+                  <span className="font-medium">{user.email}</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => router.push('/profile')}>
+                  <UserIcon className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Logout</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+                  {theme === 'dark' ? (
+                    <>
+                      <SunIcon className="mr-2 h-4 w-4" />
+                      <span>Light Mode</span>
+                    </>
+                  ) : (
+                    <>
+                      <MoonIcon className="mr-2 h-4 w-4" />
+                      <span>Dark Mode</span>
+                    </>
+                  )}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
-            <>
+            <div className="flex items-center space-x-2">
               <Link href="/auth">
-                <Button variant="ghost">Login</Button>
+                <Button variant="ghost" size="sm">Login</Button>
               </Link>
               <Link href="/signup">
-                <Button variant="ghost">Sign Up</Button>
+                <Button variant="ghost" size="sm">Sign Up</Button>
               </Link>
-            </>
+            </div>
           )}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-          >
-            {mounted && (theme === 'dark' ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />)}
-          </Button>
         </div>
       </div>
     </header>

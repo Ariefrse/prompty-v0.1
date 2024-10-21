@@ -31,11 +31,10 @@ export default function RootLayout({
             <Header />
             <div className="flex flex-1 pt-16">
               <Sidebar />
-              <main className="flex-grow pl-16 transition-all duration-300 ease-in-out">
+              <main className="flex-1 px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-8 ml-0 md:ml-16 transition-all duration-300 ease-in-out">
                 {children}
               </main>
             </div>
-            {/* <Footer /> */}
           </div>
           <Toaster />
         </ThemeProvider>

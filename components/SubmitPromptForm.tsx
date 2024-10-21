@@ -112,7 +112,7 @@ export default function SubmitPromptForm() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-5xl">
+    <div className="container mx-auto px-4 py-4 max-w-5xl">
       <h1 className="text-3xl font-bold mb-6 text-center">Submit a New Prompt</h1>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -242,7 +242,7 @@ export default function SubmitPromptForm() {
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
+          <Button type="submit" className="flex w-1/4 m-auto " disabled={isSubmitting}>
             {isSubmitting ? 'Submitting...' : 'Submit Prompt'}
           </Button>
         </form>
